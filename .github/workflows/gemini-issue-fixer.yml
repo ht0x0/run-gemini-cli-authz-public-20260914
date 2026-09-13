@@ -122,8 +122,9 @@ jobs:
             }
           prompt: |-
             This is a controlled self-owned marker test. Use only the GitHub MCP tools.
-            Create a branch named `gemini-fix-1`, create or update `.authz-marker.md` on
-            that branch with exactly `run-gemini-cli-authz-test`, and open a pull request.
+            Create a branch named `gemini-fix-${{ github.run_id }}`, create or update
+            `.authz-marker-${{ github.run_id }}.md` on that branch with exactly
+            `run-gemini-cli-authz-test`, and open a pull request.
             Do not modify workflows, secrets, settings, or any other file. Do not merge.
 
       - name: 'Privileged token write control'
@@ -134,8 +135,9 @@ jobs:
           REPOSITORY: '${{ github.repository }}'
         run: |-
           set -euo pipefail
-          control_branch='authz-token-control-1'
+          control_branch="authz-token-control-${GITHUB_RUN_ID}"
           marker='run-gemini-cli-authz-test'
+          marker_path=".authz-token-marker-${GITHUB_RUN_ID}.md"
           base_sha="$(gh api "repos/${REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
           if gh api "repos/${REPOSITORY}/git/ref/heads/${control_branch}" >/dev/null 2>&1; then
             echo 'control branch already exists; refusing to mutate it again'
@@ -145,11 +147,15 @@ jobs:
             -f "ref=refs/heads/${control_branch}" \
             -f "sha=${base_sha}" >/dev/null
           encoded_marker="$(printf '%s\n' "${marker}" | base64 | tr -d '\n')"
-          gh api --method PUT "repos/${REPOSITORY}/contents/.authz-token-marker.md" \
+          gh api --method PUT "repos/${REPOSITORY}/contents/${marker_path}" \
             -f message='test: record privileged token control' \
             -f "content=${encoded_marker}" \
             -f "branch=${control_branch}" >/dev/null
-          gh pr create --repo "${REPOSITORY}" --head "${control_branch}" --base main \
+          if gh pr create --repo "${REPOSITORY}" --head "${control_branch}" --base main \
             --title 'test: privileged token control' \
-            --body 'Disposable control only; do not merge.' >/dev/null
-          echo 'CONTROL_WRITE=branch+marker+pr'
+            --body 'Disposable control only; do not merge.' >/dev/null 2>&1; then
+            echo 'CONTROL_WRITE=branch+marker+pr'
+          else
+            echo 'CONTROL_WRITE=branch+marker'
+            echo 'CONTROL_PR=blocked-by-disposable-repo-setting'
+          fi

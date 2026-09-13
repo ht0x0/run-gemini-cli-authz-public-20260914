@@ -1,0 +1,38 @@
+name: 'Fork token control'
+
+on:
+  pull_request_review:
+    types:
+      - 'submitted'
+
+permissions:
+  contents: 'write'
+  issues: 'write'
+  pull-requests: 'write'
+
+jobs:
+  token-control:
+    if: >-
+      github.event.review.body == '@gemini-cli /approve'
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: 'Attempt self-owned marker write'
+        env:
+          GH_TOKEN: '${{ github.token }}'
+          REPOSITORY: '${{ github.repository }}'
+        run: |-
+          set -euo pipefail
+          run_key="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          control_branch="fork-token-control-${run_key}"
+          marker_path=".fork-token-marker-${run_key}.md"
+          repo_name="${REPOSITORY#*/}"
+          main_sha="$(gh api "repos/${REPOSITORY}/commits/main" --jq '.sha')"
+          gh api --method POST "repos/${REPOSITORY}/git/refs" \
+            -f "ref=refs/heads/${control_branch}" \
+            -f "sha=${main_sha}"
+          marker="fork-token-control-${run_key}"
+          encoded="$(printf '%s\n' "$marker" | base64 | tr -d '\n')"
+          gh api --method PUT "repos/${REPOSITORY}/contents/${marker_path}" \
+            -f message='test: fork token control marker' \
+            -f "content=${encoded}" \
+            -f "branch=${control_branch}"

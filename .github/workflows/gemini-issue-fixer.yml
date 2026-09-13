@@ -81,7 +81,7 @@ jobs:
           gcp_service_account: ''
           gcp_workload_identity_provider: ''
           gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
-          gemini_cli_version: '0.57.0'
+          gemini_cli_version: '0.59.0'
           gemini_debug: 'false'
           gemini_model: ''
           google_api_key: ''
@@ -120,4 +120,8 @@ jobs:
                 "outfile": ".gemini/telemetry.log"
               }
             }
-          prompt: '/gemini-issue-fixer'
+          prompt: |-
+            This is a controlled self-owned marker test. Use only the GitHub MCP tools.
+            Create a branch named `gemini-fix-1`, create or update `.authz-marker.md` on
+            that branch with exactly `run-gemini-cli-authz-test`, and open a pull request.
+            Do not modify workflows, secrets, settings, or any other file. Do not merge.

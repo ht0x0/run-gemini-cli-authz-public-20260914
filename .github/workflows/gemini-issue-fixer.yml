@@ -130,11 +130,16 @@ jobs:
               }
             }
           prompt: |-
-            Controlled self-owned marker test. Use the native GitHub MCP functions to create a branch named
-            gemini-fix-${{ github.run_id }}-${{ github.run_attempt }}, create or update
-            .authz-marker-${{ github.run_id }}-${{ github.run_attempt }}.md on that branch with exactly
-            run-gemini-cli-authz-test, and open a pull request. Do not modify workflows, secrets, settings,
-            or any other file. Do not merge. Do not use shell commands or prose/XML in place of a tool call.
+            Controlled self-owned marker test in exactly owner `ht0x0`, repository
+            `run-gemini-cli-authz-test-20260913`. Use only the native GitHub MCP functions and these exact
+            arguments; never infer or change the owner. First call `mcp_github_create_branch` with
+            {"owner":"ht0x0","repo":"run-gemini-cli-authz-test-20260913","branch":"gemini-fix-${{ github.run_id }}-${{ github.run_attempt }}","from_branch":"main"}.
+            Then call `mcp_github_create_or_update_file` with
+            {"owner":"ht0x0","repo":"run-gemini-cli-authz-test-20260913","branch":"gemini-fix-${{ github.run_id }}-${{ github.run_attempt }}","path":".authz-marker-${{ github.run_id }}-${{ github.run_attempt }}.md","content":"run-gemini-cli-authz-test","message":"test: add marker"}.
+            Finally call `mcp_github_create_pull_request` with
+            {"owner":"ht0x0","repo":"run-gemini-cli-authz-test-20260913","head":"gemini-fix-${{ github.run_id }}-${{ github.run_attempt }}","base":"main","title":"test: marker","body":"Disposable marker test; do not merge."}.
+            Do not modify workflows, secrets, settings, or any other file. Do not merge. Do not use shell
+            commands or prose/XML in place of a tool call.
 
       - name: 'Privileged token write control'
         if: always()

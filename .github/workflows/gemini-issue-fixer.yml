@@ -122,8 +122,8 @@ jobs:
             }
           prompt: |-
             This is a controlled self-owned marker test. Use only the GitHub MCP tools.
-            Create a branch named `gemini-fix-${{ github.run_id }}`, create or update
-            `.authz-marker-${{ github.run_id }}.md` on that branch with exactly
+            Create a branch named `gemini-fix-${{ github.run_id }}-${{ github.run_attempt }}`, create or update
+            `.authz-marker-${{ github.run_id }}-${{ github.run_attempt }}.md` on that branch with exactly
             `run-gemini-cli-authz-test`, and open a pull request.
             Do not modify workflows, secrets, settings, or any other file. Do not merge.
 
@@ -135,9 +135,10 @@ jobs:
           REPOSITORY: '${{ github.repository }}'
         run: |-
           set -euo pipefail
-          control_branch="authz-token-control-${GITHUB_RUN_ID}"
+          run_key="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          control_branch="authz-token-control-${run_key}"
           marker='run-gemini-cli-authz-test'
-          marker_path=".authz-token-marker-${GITHUB_RUN_ID}.md"
+          marker_path=".authz-token-marker-${run_key}.md"
           base_sha="$(gh api "repos/${REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
           if gh api "repos/${REPOSITORY}/git/ref/heads/${control_branch}" >/dev/null 2>&1; then
             echo 'control branch already exists; refusing to mutate it again'

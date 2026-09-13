@@ -12,7 +12,6 @@ permissions:
 jobs:
   control:
     if: >-
-      github.event.review.state == 'commented' &&
       github.event.sender.type == 'User' &&
       startsWith(github.event.review.body, '@gemini-cli /fix') &&
       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'),

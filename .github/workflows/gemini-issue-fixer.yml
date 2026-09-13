@@ -81,7 +81,7 @@ jobs:
           gcp_service_account: ''
           gcp_workload_identity_provider: ''
           gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
-          gemini_cli_version: '0.58.0'
+          gemini_cli_version: '0.57.0'
           gemini_debug: 'false'
           gemini_model: ''
           google_api_key: ''

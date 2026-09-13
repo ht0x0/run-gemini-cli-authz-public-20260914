@@ -12,10 +12,7 @@ permissions:
 jobs:
   control:
     if: >-
-      github.event.sender.type == 'User' &&
-      startsWith(github.event.review.body, '@gemini-cli /fix') &&
-      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'),
-        github.event.review.author_association)
+      startsWith(github.event.review.body, '@gemini-cli /fix')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout default review ref

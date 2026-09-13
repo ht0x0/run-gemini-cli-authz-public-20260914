@@ -82,12 +82,12 @@ jobs:
           gcp_workload_identity_provider: ''
           gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
           gemini_cli_version: '0.59.0'
-          gemini_debug: 'false'
+          gemini_debug: 'true'
           gemini_model: ''
           google_api_key: ''
           use_gemini_code_assist: 'false'
           use_vertex_ai: 'false'
-          upload_artifacts: 'false'
+          upload_artifacts: 'true'
           github_issue_number: '${{ github.event.issue.number }}'
           settings: |-
             {

@@ -109,13 +109,6 @@ jobs:
                     "GITHUB_PERSONAL_ACCESS_TOKEN",
                     "ghcr.io/github/github-mcp-server:v0.27.0"
                   ],
-                  "includeTools": [
-                    "issue_read",
-                    "get_file_contents",
-                    "create_branch",
-                    "create_or_update_file",
-                    "create_pull_request"
-                  ],
                   "env": {
                     "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
                   }

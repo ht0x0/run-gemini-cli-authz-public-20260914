@@ -1,0 +1,57 @@
+name: review-fix token control
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  control:
+    if: >-
+      github.event.review.state == 'commented' &&
+      github.event.sender.type == 'User' &&
+      startsWith(github.event.review.body, '@gemini-cli /fix') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'),
+        github.event.review.author_association)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default review ref
+        uses: actions/checkout@v4
+      - name: Record review checkout boundary
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          echo "EVENT_NAME=${GITHUB_EVENT_NAME}"
+          echo "EVENT_ACTION=${{ github.event.action }}"
+          echo "REVIEW_STATE=${{ github.event.review.state }}"
+          echo "REVIEWER_ASSOCIATION=${{ github.event.review.author_association }}"
+          echo "GITHUB_REF=${GITHUB_REF}"
+          echo "GITHUB_SHA=${GITHUB_SHA}"
+          echo "CHECKED_OUT_SHA=$(git rev-parse HEAD)"
+          echo "CHECKED_OUT_BRANCH=$(git branch --show-current)"
+          pr_url='${{ github.event.pull_request.url }}'
+          gh api "$pr_url" --jq '"PR_BASE_SHA=" + .base.sha + " PR_HEAD_SHA=" + .head.sha + " PR_HEAD_REPO=" + .head.repo.full_name + " PR_HEAD_FORK=" + (.head.repo.fork|tostring)'
+      - name: Prove review contents write
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          run_key="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          branch="review-fix-token-control-${run_key}"
+          marker_path=".authz-review-fix-token-marker-${run_key}.md"
+          marker='run-gemini-cli-review-fix-token-control'
+          base_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+            -f "ref=refs/heads/${branch}" -f "sha=${base_sha}" >/dev/null
+          encoded_marker="$(printf '%s\n' "$marker" | base64 | tr -d '\n')"
+          gh api --method PUT "repos/${GITHUB_REPOSITORY}/contents/${marker_path}" \
+            -f message='test: record review-fix token control' \
+            -f "content=${encoded_marker}" -f "branch=${branch}" >/dev/null
+          gh api "repos/${GITHUB_REPOSITORY}/contents/${marker_path}?ref=${branch}" \
+            --jq '"MARKER_SHA=" + .sha'
+          echo 'CONTROL_TOKEN_WRITE=branch+marker'

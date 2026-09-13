@@ -83,7 +83,7 @@ jobs:
           gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
           gemini_cli_version: 'latest'
           gemini_debug: 'true'
-          gemini_model: 'gemini-3.1-pro-preview'
+          gemini_model: 'gemini-3.1-flash-preview'
           google_api_key: ''
           use_gemini_code_assist: 'false'
           use_vertex_ai: 'false'
@@ -121,7 +121,9 @@ jobs:
               }
             }
           prompt: |-
-            Controlled self-owned marker test. Use the available GitHub MCP tools to create a branch named
+            Controlled self-owned marker test. Use the native GitHub MCP function names
+            `mcp_github_create_branch`, `mcp_github_create_or_update_file`, and
+            `mcp_github_create_pull_request` (not shell and not prose/XML) to create a branch named
             `gemini-fix-${{ github.run_id }}-${{ github.run_attempt }}`, create or update
             `.authz-marker-${{ github.run_id }}-${{ github.run_attempt }}.md` on that branch with exactly
             `run-gemini-cli-authz-test`, and open a pull request. Do not modify workflows, secrets, settings,

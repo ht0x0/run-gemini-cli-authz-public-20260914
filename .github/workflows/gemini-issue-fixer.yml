@@ -81,7 +81,7 @@ jobs:
           gcp_service_account: '${{ vars.SERVICE_ACCOUNT_EMAIL }}'
           gcp_workload_identity_provider: '${{ vars.GCP_WIF_PROVIDER }}'
           gemini_api_key: ''
-          gemini_cli_version: '0.39.1'
+          gemini_cli_version: '0.38.0'
           gemini_debug: 'true'
           gemini_model: '${{ vars.GEMINI_MODEL }}'
           google_api_key: ''
@@ -110,8 +110,7 @@ jobs:
                     "ghcr.io/github/github-mcp-server:v0.27.0"
                   ],
                   "env": {
-                    "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}",
-                    "GITHUB_TOOLS": "create_branch,create_or_update_file,create_pull_request"
+                    "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
                   }
                 }
               },

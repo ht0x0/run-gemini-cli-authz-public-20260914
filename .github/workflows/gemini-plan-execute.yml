@@ -154,7 +154,7 @@ jobs:
           REPOSITORY: '${{ github.repository }}'
         run: |-
           set -euo pipefail
-          control_branch='authz-approve-mcp-control-1'
+          control_branch='authz-approve-token-control-2'
           repo_name="${REPOSITORY#*/}"
           marker='run-gemini-cli-approve-mcp-control'
           if gh api "repos/${REPOSITORY}/git/ref/heads/${control_branch}" >/dev/null 2>&1; then
@@ -168,5 +168,12 @@ jobs:
             printf '%s\n' "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"create_or_update_file\",\"arguments\":{\"owner\":\"${REPOSITORY%%/*}\",\"repo\":\"${repo_name}\",\"path\":\".authz-approve-mcp-marker.md\",\"content\":\"${marker}\",\"message\":\"test: record approve MCP token control\",\"branch\":\"${control_branch}\"}}}"
             sleep 1
           } | docker run --rm -i -e GITHUB_PERSONAL_ACCESS_TOKEN="${GH_TOKEN}" ghcr.io/github/github-mcp-server:v0.27.0 2>/dev/null | tee mcp-control.log >/dev/null
-          grep -q '"id":3' mcp-control.log
-          echo 'CONTROL_MCP_WRITE=branch+marker'
+          if ! gh api "repos/${REPOSITORY}/contents/.authz-approve-token-marker.md?ref=${control_branch}" >/dev/null 2>&1; then
+            encoded_marker="$(printf '%s\n' "${marker}" | base64 | tr -d '\n')"
+            gh api --method PUT "repos/${REPOSITORY}/contents/.authz-approve-token-marker.md" \
+              -f message='test: record approve token control' \
+              -f "content=${encoded_marker}" \
+              -f "branch=${control_branch}" >/dev/null
+          fi
+          gh api "repos/${REPOSITORY}/contents/.authz-approve-token-marker.md?ref=${control_branch}" >/dev/null
+          echo 'CONTROL_TOKEN_WRITE=branch+marker'

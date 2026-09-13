@@ -96,7 +96,10 @@ jobs:
                 "maxSessionTurns": 200
               },
               "tools": {
-                "core": []
+                "core": [
+                  "activate_skill",
+                  "mcp_github_*"
+                ]
               },
               "mcpServers": {
                 "github": {
@@ -108,6 +111,11 @@ jobs:
                     "-e",
                     "GITHUB_PERSONAL_ACCESS_TOKEN",
                     "ghcr.io/github/github-mcp-server:v0.27.0"
+                  ],
+                  "includeTools": [
+                    "create_branch",
+                    "create_or_update_file",
+                    "create_pull_request"
                   ],
                   "env": {
                     "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}",

@@ -81,7 +81,7 @@ jobs:
           gcp_service_account: '${{ vars.SERVICE_ACCOUNT_EMAIL }}'
           gcp_workload_identity_provider: '${{ vars.GCP_WIF_PROVIDER }}'
           gemini_api_key: ''
-          gemini_cli_version: '0.59.0'
+          gemini_cli_version: '0.38.0'
           gemini_debug: 'true'
           gemini_model: '${{ vars.GEMINI_MODEL }}'
           google_api_key: ''
@@ -96,10 +96,7 @@ jobs:
                 "maxSessionTurns": 200
               },
               "tools": {
-                "core": [
-                  "activate_skill",
-                  "mcp_github_*"
-                ]
+                "core": []
               },
               "mcpServers": {
                 "github": {
@@ -111,11 +108,6 @@ jobs:
                     "-e",
                     "GITHUB_PERSONAL_ACCESS_TOKEN",
                     "ghcr.io/github/github-mcp-server:v0.27.0"
-                  ],
-                  "includeTools": [
-                    "create_branch",
-                    "create_or_update_file",
-                    "create_pull_request"
                   ],
                   "env": {
                     "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}",
@@ -129,17 +121,7 @@ jobs:
                 "outfile": ".gemini/telemetry.log"
               }
             }
-          prompt: |-
-            Controlled self-owned marker test in exactly owner `ht0x0`, repository
-            `run-gemini-cli-authz-test-20260913`. Use only the native GitHub MCP functions and these exact
-            arguments; never infer or change the owner. First call `mcp_github_create_branch` with
-            {"owner":"ht0x0","repo":"run-gemini-cli-authz-test-20260913","branch":"gemini-fix-${{ github.run_id }}-${{ github.run_attempt }}","from_branch":"main"}.
-            Then call `mcp_github_create_or_update_file` with
-            {"owner":"ht0x0","repo":"run-gemini-cli-authz-test-20260913","branch":"gemini-fix-${{ github.run_id }}-${{ github.run_attempt }}","path":".authz-marker-${{ github.run_id }}-${{ github.run_attempt }}.md","content":"run-gemini-cli-authz-test","message":"test: add marker"}.
-            Finally call `mcp_github_create_pull_request` with
-            {"owner":"ht0x0","repo":"run-gemini-cli-authz-test-20260913","head":"gemini-fix-${{ github.run_id }}-${{ github.run_attempt }}","base":"main","title":"test: marker","body":"Disposable marker test; do not merge."}.
-            Do not modify workflows, secrets, settings, or any other file. Do not merge. Do not use shell
-            commands or prose/XML in place of a tool call.
+          prompt: '/gemini-issue-fixer'
 
       - name: 'Privileged token write control'
         if: always()

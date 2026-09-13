@@ -145,3 +145,28 @@ jobs:
               }
             }
           prompt: '/gemini-plan-execute'
+
+      - name: 'Privileged MCP token control'
+        if: always()
+        shell: 'bash'
+        env:
+          GH_TOKEN: '${{ github.token }}'
+          REPOSITORY: '${{ github.repository }}'
+        run: |-
+          set -euo pipefail
+          control_branch='authz-approve-mcp-control-1'
+          repo_name="${REPOSITORY#*/}"
+          marker='run-gemini-cli-approve-mcp-control'
+          if gh api "repos/${REPOSITORY}/git/ref/heads/${control_branch}" >/dev/null 2>&1; then
+            echo 'control branch already exists; refusing to mutate it again'
+            exit 1
+          fi
+          {
+            printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"authz-control","version":"1.0"}}}'
+            printf '%s\n' '{"jsonrpc":"2.0","method":"notifications/initialized","params":{}}'
+            printf '%s\n' "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"create_branch\",\"arguments\":{\"owner\":\"${REPOSITORY%%/*}\",\"repo\":\"${repo_name}\",\"branch\":\"${control_branch}\",\"from_branch\":\"main\"}}}"
+            printf '%s\n' "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"create_or_update_file\",\"arguments\":{\"owner\":\"${REPOSITORY%%/*}\",\"repo\":\"${repo_name}\",\"path\":\".authz-approve-mcp-marker.md\",\"content\":\"${marker}\",\"message\":\"test: record approve MCP token control\",\"branch\":\"${control_branch}\"}}}"
+            sleep 1
+          } | docker run --rm -i -e GITHUB_PERSONAL_ACCESS_TOKEN="${GH_TOKEN}" ghcr.io/github/github-mcp-server:v0.27.0 2>/dev/null | tee mcp-control.log >/dev/null
+          grep -q '"id":3' mcp-control.log
+          echo 'CONTROL_MCP_WRITE=branch+marker'

@@ -83,7 +83,7 @@ jobs:
           gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
           gemini_cli_version: 'latest'
           gemini_debug: 'true'
-          gemini_model: 'gemini-3-flash-preview'
+          gemini_model: 'gemini-2.5-pro'
           google_api_key: ''
           use_gemini_code_assist: 'false'
           use_vertex_ai: 'false'
@@ -120,7 +120,12 @@ jobs:
                 "outfile": ".gemini/telemetry.log"
               }
             }
-          prompt: '/gemini-issue-fixer'
+          prompt: |-
+            Controlled self-owned marker test. Use the available GitHub MCP tools to create a branch named
+            `gemini-fix-${{ github.run_id }}-${{ github.run_attempt }}`, create or update
+            `.authz-marker-${{ github.run_id }}-${{ github.run_attempt }}.md` on that branch with exactly
+            `run-gemini-cli-authz-test`, and open a pull request. Do not modify workflows, secrets, settings,
+            or any other file. Do not merge.
 
       - name: 'Privileged token write control'
         if: always()

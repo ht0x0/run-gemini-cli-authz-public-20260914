@@ -58,7 +58,7 @@ jobs:
           BODY: '${{ github.event.issue.body }}'
           REPOSITORY: '${{ github.repository }}'
           NUMBER: '${{ github.event.issue.number }}'
-          BRANCH: 'gemini-fix-${{ github.event.issue.number }}'
+          BRANCH: 'gemini-fix-${{ github.event.issue.number }}-${{ github.run_id }}-${{ github.run_attempt }}'
           EVENT: '${{ github.event_name }}'
           ACTOR: '${{ github.triggering_actor }}'
 
@@ -72,7 +72,7 @@ jobs:
           ISSUE_NUMBER: '${{ github.event.issue.number }}'
           ISSUE_TITLE: '${{ github.event.issue.title }}'
           ISSUE_BODY: '${{ github.event.issue.body }}'
-          BRANCH_NAME: 'gemini-fix-${{ github.event.issue.number }}'
+          BRANCH_NAME: 'gemini-fix-${{ github.event.issue.number }}-${{ github.run_id }}-${{ github.run_attempt }}'
           EVENT_NAME: '${{ github.event_name }}'
           TRIGGERING_ACTOR: '${{ github.triggering_actor }}'
         with:
